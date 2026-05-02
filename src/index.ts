@@ -7,11 +7,11 @@ import {
   getStagedDiff, 
   getChangedFiles, 
   commitChanges 
-} from '../src/git.js';
-import { classifyDiff } from '../src/classifier.js';
-import { generateCommitMessage } from '../src/openai.js';
-import { showCommitOptions } from '../src/ui.js';
-import { logger, spinner, openEditor } from '../src/utils.js';
+} from './git.js';
+import { classifyDiff } from './classifier.js';
+import { generateCommitMessage } from './openai.js';
+import { showCommitOptions } from './ui.js';
+import { logger, spinner, openEditor } from './utils.js';
 
 async function main() {
   try {

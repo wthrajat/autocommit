@@ -1,4 +1,4 @@
-# smart-commit
+# autocommit
 
 A CLI tool that uses OpenAI to automatically generate high-quality, Conventional Commits-compliant commit messages from your staged git changes.
 
@@ -46,9 +46,9 @@ A CLI tool that uses OpenAI to automatically generate high-quality, Conventional
 
 2. Run the tool:
    ```bash
-   smart-commit
+   autocommit
    ```
-   *(If not linked, run `pnpm run start` or `./dist/bin/smart-commit.js` in the project root)*
+   *(If not linked, run `pnpm run start` or `./dist/index.js` in the project root)*
 
 3. Choose an option:
    - **Accept and commit**: Commits right away.
@@ -60,7 +60,7 @@ A CLI tool that uses OpenAI to automatically generate high-quality, Conventional
 
 ```
 $ git add src/git.ts
-$ smart-commit
+$ autocommit
 
 ℹ Analyzing diff and generating commit message...
 ✔ Message generated successfully
