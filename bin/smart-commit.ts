@@ -21,11 +21,7 @@ async function main() {
       process.exit(1);
     }
 
-    const isGit = await isGitRepository();
-    if (!isGit) {
-      logger.error('Not a git repository (or any of the parent directories).');
-      process.exit(1);
-    }
+    await isGitRepository();
 
     const hasChanges = await hasStagedChanges();
     if (!hasChanges) {

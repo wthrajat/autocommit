@@ -36,6 +36,7 @@ export async function generateCommitMessage(diff, type) {
         return cleanContent.trim();
     }
     catch (error) {
+        console.error(error);
         // If OpenAI API fails, return a fallback message rather than crashing
         return type ? `${type}: update files (fallback)` : FALLBACK_MESSAGE;
     }

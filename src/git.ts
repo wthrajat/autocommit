@@ -5,12 +5,12 @@ export async function isGitRepository(): Promise<boolean> {
     await execa('git', ['rev-parse', '--is-inside-work-tree']);
     return true;
   } catch {
-    return false;
+    console.error('Not a git repository');
+    process.exit(1);
   }
 }
 
 export async function hasStagedChanges(): Promise<boolean> {
-  const { stdout } = await execa('git', ['status', '--porcelain']);
   // Lines starting with any non-space char or starting with space and then non-space.
   // Actually, staged changes are indicated by the first column being something other than ' ' or '?'.
   // We can also just use git diff --cached --quiet to check for staged changes.
