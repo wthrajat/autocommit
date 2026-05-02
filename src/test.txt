@@ -1,1 +1,3 @@
-I wanna add this file that tells me my name
+I wanna add this file that tells me my name.
+
+But I can also use this to track my expenses.
