@@ -33,12 +33,12 @@ export async function generateCommitMessage(diff: string, type: CommitType | nul
 
   // Pre-check if diff is empty before calling API
   if (!diff || diff.trim().length === 0) {
+    console.log(chalk.red('✖'), 'No diff found');
     return FALLBACK_MESSAGE;
   }
 
-  const client = new OpenAI({ apiKey });
+  const client = new OpenAI({ apiKey, logLevel: 'info' });
 
-  // Optimization: Clean and Truncate
   // 10k chars is plenty for a commit message while keeping costs very low
   const cleanedDiff = cleanDiff(diff).substring(0, 10000);
   
@@ -58,9 +58,7 @@ export async function generateCommitMessage(diff: string, type: CommitType | nul
           content: prompt 
         }
       ],
-      // 0.0 makes it predictable/deterministic for CLI tools
       temperature: 0, 
-      // Prevents spending credits on long, chatty responses
       max_completion_tokens: 60, 
     });
 
@@ -70,7 +68,6 @@ export async function generateCommitMessage(diff: string, type: CommitType | nul
       return type ? `${type}: update files (fallback)` : FALLBACK_MESSAGE;
     }
 
-    // Clean up any accidental markdown backticks
     return content.replace(/^(?:```[a-z]*\n?)|(?:```)$/g, '').trim();
 
   } catch (error: any) {
