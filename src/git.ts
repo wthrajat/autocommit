@@ -46,5 +46,5 @@ export async function getChangedFiles(): Promise<string[]> {
 }
 
 export async function commitChanges(message: string): Promise<void> {
-  await execa('git', ['commit', '-m', message]);
+  await execa('git', ['commit', '-S', '-m', message]);
 }

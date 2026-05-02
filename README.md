@@ -1,10 +1,11 @@
 # autocommit
 
-A CLI tool that uses OpenAI to automatically generate high-quality, Conventional Commits-compliant commit messages from your staged git changes.
+A CLI tool that uses OpenAI to automatically generate high-quality, Conventional Commits-compliant, and **cryptographically signed** commit messages from your staged git changes.
 
 ## Features
 
 - **Automated commit generation**: Analyzes `git diff --cached` using OpenAI.
+- **Signed Commits**: Automatically uses the `-S` flag to sign your commits.
 - **Conventional Commits**: Strict adherence to the standard (feat, fix, docs, etc.).
 - **Heuristics classifier**: Smart categorization based on the files you've changed.
 - **Fast and interactive**: Review, edit, or regenerate messages instantly.
@@ -14,7 +15,25 @@ A CLI tool that uses OpenAI to automatically generate high-quality, Conventional
 - Node.js >= 18
 - An OpenAI API Key
 
-## Setup
+## Installation
+
+Install globally via npm:
+
+```bash
+npm install -g @wthrajat/autocommit
+```
+
+### Configuration
+
+You need an OpenAI API key to use this tool. In your terminal or `.bashrc`/`.zshrc`, add:
+
+```bash
+export OPENAI_API_KEY="sk-your-api-key"
+```
+
+## Local Development
+
+If you want to run this locally or contribute to the project:
 
 1. Install dependencies:
    ```bash
@@ -26,16 +45,10 @@ A CLI tool that uses OpenAI to automatically generate high-quality, Conventional
    pnpm run build
    ```
 
-3. Set up your OpenAI API Key. In your terminal or `.bashrc`/`.zshrc`, add:
-   ```bash
-   export OPENAI_API_KEY="sk-your-api-key"
-   ```
-
-4. Make the tool accessible globally (optional):
+3. Make the tool accessible globally:
    ```bash
    npm link
    ```
-   Or use it directly via your package manager.
 
 ## Usage
 
@@ -79,7 +92,3 @@ feat(git): add function to check staged changes
     Regenerate
     Quit
 ```
-
-## License
-
-ISC
