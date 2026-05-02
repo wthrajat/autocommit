@@ -1,5 +1,5 @@
 {
-  "name": "smart-commit",
+  "name": "@wthrajat/autocommit",
   "version": "0.0.1",
   "description": "",
   "keywords": [],
@@ -9,9 +9,13 @@
   "bin": {
     "smart-commit": "./dist/bin/smart-commit.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsx bin/smart-commit.ts",
+    "lint": "pnpm eslint .",
     "start": "node dist/bin/smart-commit.js"
   },
   "dependencies": {

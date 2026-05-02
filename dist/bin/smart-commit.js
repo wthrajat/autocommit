@@ -12,11 +12,7 @@ async function main() {
             logger.info('Please set it using: export OPENAI_API_KEY="your-key-here"');
             process.exit(1);
         }
-        const isGit = await isGitRepository();
-        if (!isGit) {
-            logger.error('Not a git repository (or any of the parent directories).');
-            process.exit(1);
-        }
+        await isGitRepository();
         const hasChanges = await hasStagedChanges();
         if (!hasChanges) {
             logger.warn('No staged changes found. Did you forget to run `git add`?');
