@@ -1,0 +1,35 @@
+{
+  "name": "smart-commit",
+  "version": "0.0.1",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "Rajat Khanduri",
+  "type": "module",
+  "bin": {
+    "smart-commit": "./dist/bin/smart-commit.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx bin/smart-commit.ts",
+    "start": "node dist/bin/smart-commit.js"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "dotenv": "^17.4.2",
+    "execa": "^9.6.1",
+    "openai": "^6.35.0",
+    "ora": "^9.4.0",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/prompts": "^2.4.9",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": "24.13.0"
+  }
+}
