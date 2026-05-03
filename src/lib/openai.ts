@@ -3,7 +3,7 @@ import type { CommitType } from '../types/index.js';
 import { generatePrompt } from './prompt.js';
 import chalk from 'chalk';
 
-const FALLBACK_MESSAGE = 'chore: update files';
+const FALLBACK_MESSAGE = 'chore(scope): update files';
 
 /**
  * Clean up the git diff by removing low-signal metadata lines
@@ -24,7 +24,7 @@ function cleanDiff(diff: string): string {
     .trim();
 }
 
-export async function generateCommitMessage(diff: string, type: CommitType | null): Promise<string> {
+export async function generateCommitMessage(diff: string, type: CommitType | null, files: string[] = []): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     console.log(chalk.red('✖'), 'OPENAI_API_KEY environment variable is not set');
@@ -48,11 +48,11 @@ export async function generateCommitMessage(diff: string, type: CommitType | nul
       messages: [
     { 
       role: 'system', 
-      content: 'You are a git commit generator. Rules: 1. Conventional Commits strictly. 2. Concise/Specific. 3. No explanation/markdown. 4. Max 72 chars. 5. Lowercase summary. 6. No trailing period. 7. Use bullet points for non-trivial changes. IMPORTANT: DO NOT USE CODE BLOCKS FOR CODE COMMITS - use bullet points or simple sentences instead.' 
+      content: 'You are a git commit generator. Follow Conventional Commits strictly.\n\nRules:\n1. Output EXACTLY ONE summary line first.\n2. ALWAYS include scope like feat(auth): or fix(core):.\n3. Summary max 72 chars, lowercase, no trailing period.\n4. For non-trivial changes, add ONE blank line after summary, then bullet points.\n5. DO NOT use markdown code blocks.\n6. NEVER output multiple separate commits, combine them into one.' 
     },
     { 
       role: 'user', 
-      content: generatePrompt(cleanedDiff, type) 
+      content: generatePrompt(cleanedDiff, type, files) 
     }
   ],
       temperature: 0, 
@@ -62,13 +62,12 @@ export async function generateCommitMessage(diff: string, type: CommitType | nul
     const content = response.choices[0]?.message?.content?.trim();
     
     if (!content) {
-      return type ? `${type}: update files (fallback)` : FALLBACK_MESSAGE;
+return type ? `${type}(scope): update files (fallback)` : FALLBACK_MESSAGE;
     }
 
-    return content.replace(/^(?:```[a-z]*\n?)|(?:```)$/g, '').trim();
-
+    return content;
   } catch (error: any) {
     console.error('OpenAI API Error:', error.message || error);
-    return type ? `${type}: update files (fallback)` : FALLBACK_MESSAGE;
+    return type ? `${type}(scope): update files (fallback)` : FALLBACK_MESSAGE;
   }
 }

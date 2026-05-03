@@ -59,7 +59,7 @@ async function main() {
     while (action === 'regenerate') {
       const s = spinner('Analyzing diff and generating commit message...').start();
       try {
-        message = await generateCommitMessage(diff, type);
+        message = await generateCommitMessage(diff, type, files);
         s.succeed('Message generated successfully');
       } catch (error: any) {
         s.fail('Failed to generate message');
