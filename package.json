@@ -24,8 +24,8 @@
   "license": "MIT",
   "author": "Rajat Khanduri <logsinx@proton.me> (https://wthrajat.com)",
   "type": "module",
-  "bin": {
-    "autocommit": "dist/index.js"
+"bin": {
+    "autocommit": "./dist/cli/index.js"
   },
   "files": [
     "dist"

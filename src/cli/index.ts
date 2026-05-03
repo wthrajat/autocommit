@@ -7,12 +7,12 @@ import {
   getStagedDiff, 
   getChangedFiles, 
   commitChanges 
-} from './git.js';
-import { classifyDiff } from './classifier.js';
-import { generateCommitMessage } from './openai.js';
-import { showCommitOptions } from './ui.js';
-import { logger, spinner, openEditor } from './utils.js';
-import { getApiKey, saveApiKey } from './config.js';
+} from '../lib/git.js';
+import { classifyDiff } from '../lib/classifier.js';
+import { generateCommitMessage } from '../lib/openai.js';
+import { showCommitOptions } from '../utils/ui.js';
+import { logger, spinner, openEditor } from '../utils/index.js';
+import { getApiKey, saveApiKey } from '../config/index.js';
 
 async function main() {
   try {

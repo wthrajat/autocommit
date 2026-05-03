@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import type { CommitType } from './types.js';
+import type { CommitType } from '../types/index.js';
 import { generatePrompt } from './prompt.js';
 import chalk from 'chalk';
 

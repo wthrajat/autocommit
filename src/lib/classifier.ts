@@ -1,4 +1,4 @@
-import type { CommitType } from './types.js';
+import type { CommitType } from '../types/index.js';
 
 export function classifyDiff(files: string[], diff: string): CommitType | null {
   const isOnlyTests = files.every(f => f.includes('test') || f.includes('spec'));
