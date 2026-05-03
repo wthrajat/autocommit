@@ -6,13 +6,15 @@ import {
   hasStagedChanges, 
   getStagedDiff, 
   getChangedFiles, 
-  commitChanges 
+  commitChanges,
+  getBranchName
 } from '../lib/git.js';
 import { classifyDiff } from '../lib/classifier.js';
 import { generateCommitMessage } from '../lib/openai.js';
 import { showCommitOptions } from '../utils/ui.js';
 import { logger, spinner, openEditor } from '../utils/index.js';
 import { getApiKey, saveApiKey } from '../config/index.js';
+import { ActionType } from '../types/index.js';
 
 async function main() {
   try {
@@ -48,18 +50,19 @@ async function main() {
       process.exit(0);
     }
 
-    let message = '';
-    let shouldCommit = false;
-    let action: 'accept' | 'edit' | 'regenerate' | 'quit' = 'regenerate';
+    let message: string = '';
+    let shouldCommit: boolean = false;
+    let action: ActionType = 'regenerate';
 
     const diff = await getStagedDiff();
     const files = await getChangedFiles();
+    const branchName = await getBranchName();
     const type = classifyDiff(files, diff);
 
     while (action === 'regenerate') {
       const s = spinner('Analyzing diff and generating commit message...').start();
       try {
-        message = await generateCommitMessage(diff, type, files);
+        message = await generateCommitMessage(diff, type, files, branchName);
         s.succeed('Message generated successfully');
       } catch (error: any) {
         s.fail('Failed to generate message');

@@ -48,3 +48,12 @@ export async function getChangedFiles(): Promise<string[]> {
 export async function commitChanges(message: string): Promise<void> {
   await execa('git', ['commit', '-S', '-m', message]);
 }
+
+export async function getBranchName(): Promise<string> {
+  try {
+    const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
+    return stdout.trim();
+  } catch {
+    return '';
+  }
+}

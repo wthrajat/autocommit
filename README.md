@@ -7,6 +7,7 @@ changes and executes the commit in one go. And it is cheap.
 
 - Analyzes `git diff --cached` using GPT-5-Mini.
 - Uses heuristics to classify the type of changes (feat, fix, docs, etc.).
+- **Branch-to-Ticket Auto-Linking**: Automatically extracts Jira/Linear ticket IDs (e.g., `ENG-123`) from your branch name and appends them to the commit message.
 - Review, edit, or regenerate messages instantly.
 - Commits the changes on its own.
 

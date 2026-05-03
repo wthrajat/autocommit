@@ -24,7 +24,7 @@ function cleanDiff(diff: string): string {
     .trim();
 }
 
-export async function generateCommitMessage(diff: string, type: CommitType | null, files: string[] = []): Promise<string> {
+export async function generateCommitMessage(diff: string, type: CommitType | null, files: string[] = [], branchName: string = ''): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     console.log(chalk.red('✖'), 'OPENAI_API_KEY environment variable is not set');
@@ -52,7 +52,7 @@ export async function generateCommitMessage(diff: string, type: CommitType | nul
     },
     { 
       role: 'user', 
-      content: generatePrompt(cleanedDiff, type, files) 
+      content: generatePrompt(cleanedDiff, type, files, branchName) 
     }
   ],
       temperature: 0, 

@@ -15,3 +15,5 @@ export interface CommitOptions {
   type: CommitType | null;
   diff: string;
 }
+
+export type ActionType = 'accept' | 'edit' | 'regenerate' | 'quit';
