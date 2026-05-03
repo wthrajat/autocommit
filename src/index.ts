@@ -12,14 +12,33 @@ import { classifyDiff } from './classifier.js';
 import { generateCommitMessage } from './openai.js';
 import { showCommitOptions } from './ui.js';
 import { logger, spinner, openEditor } from './utils.js';
+import { getApiKey, saveApiKey } from './config.js';
 
 async function main() {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      logger.error('OPENAI_API_KEY environment variable is not set.');
-      logger.info('Please set it using: export OPENAI_API_KEY="your-key-here"');
+    const args = process.argv.slice(2);
+    const setApiKeyIndex = args.indexOf('--set-apikey');
+
+    if (setApiKeyIndex !== -1) {
+      const newApiKey = args[setApiKeyIndex + 1];
+      if (!newApiKey || newApiKey.startsWith('--')) {
+        logger.error('Please provide a valid API key after --set-apikey');
+        process.exit(1);
+      }
+      await saveApiKey(newApiKey);
+      logger.success('API key saved successfully to ~/.autocommitrc!');
+      process.exit(0);
+    }
+
+    const apiKey = await getApiKey();
+    
+    if (!apiKey) {
+      logger.error('OpenAI API key not found.');
+      logger.info('Please set it by running: autocommit --set-apikey "sk-your-api-key"');
       process.exit(1);
     }
+    
+    process.env.OPENAI_API_KEY = apiKey;
 
     await isGitRepository();
 
