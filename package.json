@@ -25,7 +25,7 @@
   "author": "Rajat Khanduri <logsinx@proton.me> (https://wthrajat.com)",
   "type": "module",
   "bin": {
-    "autocommit": "./dist/cli/index.js"
+    "autocommit": "dist/cli/index.js"
   },
   "files": [
     "dist"
