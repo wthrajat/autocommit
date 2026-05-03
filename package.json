@@ -1,6 +1,6 @@
 {
   "name": "@wthrajat/autocommit",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Automatically generate high-quality, Conventional Commits-compliant signed commit messages from your staged git changes using OpenAI.",
   "keywords": [],
   "license": "ISC",
