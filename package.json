@@ -1,10 +1,28 @@
 {
   "name": "@wthrajat/autocommit",
   "version": "0.0.5",
-  "description": "Automatically generate high-quality, Conventional Commits-compliant signed commit messages from your staged git changes using OpenAI.",
-  "keywords": [],
+  "description": "Tool that generates conventional commits from staged changes and executes the commit in one go for cheap.",
+  "keywords": [
+    "git",
+    "commit",
+    "conventional-commits",
+    "gpt",
+    "openai",
+    "ai",
+    "smart",
+    "auto",
+    "autocommit"
+  ],
+  "homepage": "",
+  "bugs": {
+    "url": "https://github.com/wthrajat/autocommit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wthrajat/autocommit"
+  },
   "license": "MIT",
-  "author": "Rajat Khanduri",
+  "author": "Rajat Khanduri <logsinx@proton.me> (https://wthrajat.com)",
   "type": "module",
   "bin": {
     "autocommit": "dist/index.js"
@@ -36,6 +54,6 @@
     "typescript-eslint": "^8.59.1"
   },
   "engines": {
-    "node": "24.13.0"
+    "node": ">=24.13.0"
   }
 }
