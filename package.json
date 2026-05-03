@@ -1,6 +1,6 @@
 {
   "name": "@wthrajat/autocommit",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Tool that generates conventional commits from staged changes and executes the commit in one go for cheap.",
   "keywords": [
     "git",
@@ -24,7 +24,7 @@
   "license": "MIT",
   "author": "Rajat Khanduri <logsinx@proton.me> (https://wthrajat.com)",
   "type": "module",
-"bin": {
+  "bin": {
     "autocommit": "./dist/cli/index.js"
   },
   "files": [
@@ -32,7 +32,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsx src/index.ts",
+    "dev": "tsx src/cli/index.ts",
     "lint": "pnpm eslint .",
     "start": "node dist/index.js"
   },
