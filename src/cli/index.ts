@@ -97,13 +97,13 @@ async function main() {
           name: 'model',
           message: 'Which AI model would you like to use?',
           choices: [
-            { title: 'OpenAI (GPT-5)', value: 'openai' },
+            { title: 'OpenAI', value: 'openai' },
             { title: 'Google Gemini', value: 'gemini' }
           ],
           initial: 0
         },
         {
-          type: 'text',
+          type: 'password',
           name: 'apiKey',
           message: (prev) => `Enter your ${prev === 'openai' ? 'OpenAI' : 'Gemini'} API key:`,
           validate: (value) => value.length > 0 ? true : 'API key is required'
@@ -119,19 +119,17 @@ async function main() {
           initial: 0
         }
       ]);
+      const model = setup.model;
+      const apiKey = setup.apiKey;
+      const messageStyle = setup.messageStyle;
 
-      if (!setup.apiKey) {
-        logger.error('API key is required.');
-        process.exit(1);
-      }
-
-      if (setup.model === 'openai') {
-        await saveOpenAIKey(setup.apiKey);
+      if (model === 'openai') {
+        await saveOpenAIKey(apiKey);
       } else {
-        await saveGeminiKey(setup.apiKey);
+        await saveGeminiKey(apiKey);
       }
-      await setMessageStyle(setup.messageStyle);
-      
+      await setMessageStyle(messageStyle);
+
       logger.success('\nConfiguration saved to ~/.autocommitrc!');
       console.log(chalk.gray('You can change these settings anytime with:'));
       console.log(chalk.gray('  autocommit --openai-key "key"'));
