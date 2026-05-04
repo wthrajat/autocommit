@@ -188,7 +188,7 @@ async function main() {
           console.log(chalk.blue('Using OpenAI model for generation'));
           message = await generateOpenAI(diff, type, files, branchName, messageStyle);
         }
-        s.succeed('Message generated successfully');
+        s.succeed('Commit message generated!');
       } catch (error: any) {
         s.fail('Failed to generate message');
         logger.error(error.message);
