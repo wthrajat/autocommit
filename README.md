@@ -7,7 +7,9 @@ Tool that generates and pushes [conventional commits](https://www.conventionalco
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/en/download)
-- An [OpenAI API Key](https://platform.openai.com/api-keys) OR [Gemini API Key](https://aistudio.google.com/app/apikey)
+- One of these API keys:
+ - [Gemini](https://aistudio.google.com/app/apikey) (free tier available)
+ - [OpenAI](https://platform.openai.com/api-keys)
 
 ## Installation
 
@@ -25,7 +27,7 @@ autocommit -v
 
 ### Configuration
 
-Save your API key(s) in `~/.autocommitrc`. You can save keys for both providers and switch between them:
+Save your API key(s) and configure defaults in `~/.autocommitrc`:
 
 ```bash
 # Save OpenAI key (keeps existing Gemini key if any)
@@ -34,16 +36,19 @@ autocommit --openai-key "sk-your-api-key"
 # Save Gemini key (keeps existing OpenAI key if any)
 autocommit --gemini-key "your-gemini-api-key"
 
-# Switch default model
+# Default model (openai or gemini)
 autocommit --model gemini
-autocommit --model openai
+
+# Default message style: short (one-line) or long (with description)
+autocommit --short
+autocommit --long
 ```
 
-**Runtime switch** - override default model for a single run:
+**Runtime overrides:**
 
 ```bash
 AUTOCOMMIT_MODEL=gemini autocommit
-AUTOCOMMIT_MODEL=openai autocommit
+AUTOCOMMIT_MESSAGE_STYLE=long autocommit
 ```
 
 ## Usage

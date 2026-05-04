@@ -17,7 +17,7 @@ import { generateCommitMessage as generateOpenAI } from '../lib/openai.js';
 import { generateCommitMessage as generateGemini } from '../lib/gemini.js';
 import { showCommitOptions } from '../utils/ui.js';
 import { logger, spinner, openEditor } from '../utils/index.js';
-import { getConfig, saveOpenAIKey, saveGeminiKey, setDefaultModel, ModelType } from '../config/index.js';
+import { getConfig, saveOpenAIKey, saveGeminiKey, setDefaultModel, setMessageStyle, getMessageStyle, ModelType } from '../config/index.js';
 import { ActionType } from '../types/index.js';
 import chalk from 'chalk';
 
@@ -37,6 +37,8 @@ async function main() {
     const openaiKeyIndex = args.indexOf('--openai-key');
     const geminiKeyIndex = args.indexOf('--gemini-key');
     const modelIndex = args.indexOf('--model');
+    const shortIndex = args.indexOf('--short');
+    const longIndex = args.indexOf('--long');
 
     if (openaiKeyIndex !== -1) {
       const apiKey = args[openaiKeyIndex + 1];
@@ -71,7 +73,20 @@ async function main() {
       process.exit(0);
     }
 
+    if (shortIndex !== -1) {
+      await setMessageStyle('short');
+      logger.success('Message style set to short!');
+      process.exit(0);
+    }
+
+    if (longIndex !== -1) {
+      await setMessageStyle('long');
+      logger.success('Message style set to long!');
+      process.exit(0);
+    }
+
     const config = await getConfig();
+    const messageStyle = getMessageStyle(config || { openaiKey: '', geminiKey: '', model: 'openai', messageStyle: 'short' });
     
     if (!config || (!config.openaiKey && !config.geminiKey)) {
       logger.error('No API key found.');
@@ -113,11 +128,11 @@ async function main() {
       try {
         if (config.model === 'gemini') {
           console.log(chalk.blue('Using Gemini model for generation'));
-          message = await generateGemini(diff, type, files, branchName);
+          message = await generateGemini(diff, type, files, branchName, messageStyle);
         }
         else {
           console.log(chalk.blue('Using OpenAI model for generation'));
-          message = await generateOpenAI(diff, type, files, branchName);
+          message = await generateOpenAI(diff, type, files, branchName, messageStyle);
         }
         s.succeed('Message generated successfully');
       } catch (error: any) {
