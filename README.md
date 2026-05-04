@@ -23,20 +23,6 @@ To verify the installation, check the version:
 autocommit -v
 ```
 
-### Updating
-
-To update to the latest version, run:
-
-```bash
-npm i @wthrajat/autocommit@latest
-```
-
-Or to latest within semver range:
-
-```bash
-npm update @wthrajat/autocommit
-```
-
 ### Configuration
 
 Run the following command to securely save your API key in your home directory (`~/.autocommitrc`):
@@ -63,8 +49,20 @@ autocommit --set-apikey "sk-your-api-key"
    - **Regenerate**: Asks OpenAI for a new attempt.
    - **Quit**: Cancels the operation.
 
-## Example
 
+### Updating
+
+To update to the latest version, run:
+
+```bash
+npm i @wthrajat/autocommit@latest
+```
+
+Or to latest within semver range:
+
+```bash
+npm update @wthrajat/autocommit
+```
 
 ## Local Development
 
