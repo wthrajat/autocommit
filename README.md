@@ -1,7 +1,7 @@
-# autocommit [![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-federation.svg?logo=git&logoColor=white) ![GPT-5-Mini](https://img.shields.io/badge/GPT--5--Mini-412991?logo=openai&logoColor=white)
+# autocommit
+[![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit) ![GPT-5-Mini](https://img.shields.io/badge/GPT--5--Mini-412991?logo=openai&logoColor=white) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-federation.svg?logo=git&logoColor=white)
 
-Tool that generates [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) from staged 
-changes and executes the commit in one go. And it is cheap.
+Tool that generates and pushes [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) from staged changes in one go.
 
 ## How
 
@@ -13,7 +13,9 @@ changes and executes the commit in one go. And it is cheap.
 
 ## Why
 
-It's just way cheaper for me. I still use Claude and Codex for the heavy lifting, but I never let them commit, I commit myself. I've let claude push commits for me several times and have hit my daily limit much faster. I think this has something to do with the recent bug where Claude was eating tokens like crazy. Anthropic even acknowledged the issue, see their [april report](https://www.anthropic.com/engineering/april-23-postmortem). So I am using this for my day to day work and so far so good. It has been a massive micro-productivity boost for me daily; I just stage my changes, run `autocommit`, and move on without burning through my main AI credits. One credit top-up lasts so long it's basically a "set it and forget it" situation. To give you an idea, as of now, OpenAI charges just `$0.075` / `1M` tokens for GPT-5-Mini.
+It's just way cheaper for me. I still use Claude and Codex for the heavy lifting, but I never let them commit, I commit myself. I've let claude push commits for me several times and have hit my daily limit much faster. I think this has something to do with the recent bug where Claude was eating tokens like crazy. Anthropic even acknowledged the issue, see their [april report](https://www.anthropic.com/engineering/april-23-postmortem). When Claude is already deep into working on a feature, the conversation context window grows. And since every API request re-sends the entire conversation history, each subsequent call gets more expensive as the context grows so it makes sense to separate out the commit generating part imo.
+
+So I am using this for my day to day work for like ~4 months now and so far so good. It has been a massive micro-productivity boost for me daily; I just stage my changes, run `autocommit`, and move on without burning through my main AI credits and thinking of a nice commit message. One credit top-up lasts so long it's basically a "set it and forget it" situation. To give you an idea, as of now, OpenAI charges just `$0.075` / `1M` tokens for GPT-5-Mini.
 
 And and no commitment issues like my ex :)
 
@@ -50,11 +52,9 @@ Or to latest within semver range:
 npm update @wthrajat/autocommit
 ```
 
-To check your current version, run:
+To check if it's installed, you can check the version:
 
 ```bash
-autocommit --version
-# or
 autocommit -v
 ```
 
