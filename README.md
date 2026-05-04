@@ -30,6 +30,20 @@ Install globally via `npm`:
 npm i -g @wthrajat/autocommit
 ```
 
+### Updating
+
+To update to the latest version, run:
+
+```bash
+npm i @wthrajat/autocommit@latest
+```
+
+Or to latest within semver range:
+
+```bash
+npm update @wthrajat/autocommit
+```
+
 ### Configuration
 
 Run the following command to securely save your API key in your home directory (`~/.autocommitrc`):
