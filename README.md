@@ -58,11 +58,11 @@ npm uninstall -g @wthrajat/autocommit
 npm i -g @wthrajat/autocommit@latest
 ```
 
-## Local Development
+## Local Dev
 
 Run it using `pnpm i && pnpm run dev` in the project root. Can also use `pnpm link` to link the package globally and test it in any repo without needing to build every time.
 
-4. See [usage](#usage) section
+<hr>
 
 ## Why
 
