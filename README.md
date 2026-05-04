@@ -1,4 +1,4 @@
-# `autocommit` [![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit) ![AI](https://img.shields.io/badge/AI-GPT--5--Gemini-412991?logo=openai&logoColor=white) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-federation.svg?logo=git&logoColor=white)
+# `autocommit` [![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit)
 
 Tool that generates and pushes [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) from staged changes in one go.
 

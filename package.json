@@ -1,6 +1,7 @@
 {
   "name": "@wthrajat/autocommit",
   "version": "0.0.22",
+  "private": false,
   "description": "Tool that generates conventional commits from staged changes and executes the commit in one go for cheap.",
   "keywords": [
     "git",
