@@ -80,7 +80,7 @@ autocommit --set-apikey "sk-your-api-key"
 
 3. Choose an option:
    - **Accept and commit**: Commits right away.
-   - **Edit message**: Opens `$EDITOR` to adjust the message before committing.
+   - **Edit message**: Opens a text editor to adjust the message before committing.
    - **Regenerate**: Asks OpenAI for a new attempt.
    - **Quit**: Cancels the operation.
 
