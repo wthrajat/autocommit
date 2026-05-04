@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import 'dotenv/config';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
+const VERSION = pkg.version;
 import { 
   isGitRepository, 
   hasStagedChanges, 
@@ -16,13 +23,11 @@ import { logger, spinner, openEditor } from '../utils/index.js';
 import { getApiKey, saveApiKey } from '../config/index.js';
 import { ActionType } from '../types/index.js';
 
-const VERSION = '0.0.11';
-
 async function main() {
   try {
     const args = process.argv.slice(2);
 
-    if (args.includes('--version') || args.includes('-v')) {
+if (args.includes('--version') || args.includes('-v')) {
       console.log(`autocommit version ${VERSION}`);
       process.exit(0);
     }
