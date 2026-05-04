@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import 'dotenv/config';
+import prompts from 'prompts';
 import { 
   isGitRepository, 
   hasStagedChanges, 
@@ -85,13 +86,51 @@ async function main() {
       process.exit(0);
     }
 
-    const config = await getConfig();
+    let config = await getConfig();
     const messageStyle = getMessageStyle(config || { openaiKey: '', geminiKey: '', model: 'openai', messageStyle: 'short' });
     
     if (!config || (!config.openaiKey && !config.geminiKey)) {
-      logger.error('No API key found.');
-      logger.info('Please set it by running: autocommit --openai-key "sk-..." or autocommit --gemini-key "..."');
-      process.exit(1);
+      const setup = await prompts([
+        {
+          type: 'select',
+          name: 'model',
+          message: 'Which AI model would you like to use?',
+          choices: [
+            { title: 'OpenAI (GPT-5)', value: 'openai' },
+            { title: 'Google Gemini', value: 'gemini' }
+          ],
+          initial: 0
+        },
+        {
+          type: 'text',
+          name: 'apiKey',
+          message: 'Enter your API key:',
+          validate: (value) => value.length > 0 ? true : 'API key is required'
+        },
+        {
+          type: 'select',
+          name: 'messageStyle',
+          message: 'What commit message style do you prefer?',
+          choices: [
+            { title: 'Short (one-line summary)', value: 'short' },
+            { title: 'Long (with description)', value: 'long' }
+          ],
+          initial: 0
+        }
+      ]);
+
+      if (setup.model === 'openai') {
+        await saveOpenAIKey(setup.apiKey);
+      } else {
+        await saveGeminiKey(setup.apiKey);
+      }
+      await setMessageStyle(setup.messageStyle);
+      
+      config = await getConfig();
+      if (!config) {
+        logger.error('Failed to save configuration.');
+        process.exit(1);
+      }
     }
     
     if (config.model === 'gemini' && config.geminiKey) {

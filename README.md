@@ -8,8 +8,8 @@ Tool that generates and pushes [conventional commits](https://www.conventionalco
 
 - [Node.js](https://nodejs.org/en/download)
 - One of these API keys:
- - [Gemini](https://aistudio.google.com/app/apikey) (free tier available)
- - [OpenAI](https://platform.openai.com/api-keys)
+  - [Gemini](https://aistudio.google.com/app/apikey) (free tier available)
+  - [OpenAI](https://platform.openai.com/api-keys)
 
 ## Installation
 
