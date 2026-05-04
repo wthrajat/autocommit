@@ -6,7 +6,6 @@ Tool that generates and pushes [conventional commits](https://www.conventionalco
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/en/download)
 - One of these API keys:
   - [Gemini](https://aistudio.google.com/app/apikey) (free tier available)
   - [OpenAI](https://platform.openai.com/api-keys)
@@ -23,32 +22,6 @@ To verify the installation, check the version:
 
 ```bash
 autocommit -v
-```
-
-### Configuration
-
-Save your API key(s) and configure defaults in `~/.autocommitrc`:
-
-```bash
-# Save OpenAI key (keeps existing Gemini key if any)
-autocommit --openai-key "sk-your-api-key"
-
-# Save Gemini key (keeps existing OpenAI key if any)
-autocommit --gemini-key "your-gemini-api-key"
-
-# Default model (openai or gemini)
-autocommit --model gemini
-
-# Default message style: short (one-line) or long (with description)
-autocommit --short
-autocommit --long
-```
-
-**Runtime overrides:**
-
-```bash
-AUTOCOMMIT_MODEL=gemini autocommit
-AUTOCOMMIT_MESSAGE_STYLE=long autocommit
 ```
 
 ## Usage
@@ -75,25 +48,25 @@ AUTOCOMMIT_MESSAGE_STYLE=long autocommit
 To update to the latest version, run:
 
 ```bash
-npm i @wthrajat/autocommit@latest
+npm update @wthrajat/autocommit
 ```
 
-Or to latest within semver range:
+If update fails for whateva reason, try uninstalling and reinstalling:
 
 ```bash
-npm update @wthrajat/autocommit
+npm uninstall -g @wthrajat/autocommit
+npm i -g @wthrajat/autocommit@latest
 ```
 
 ## Local Development
 
-If you want to run this locally (you can use `npm` as well ofc)
 
-1. Install dependencies:
+1. Install deps:
    ```bash
    pnpm i
    ```
 
-2. Build the tool:
+2. Build:
    ```bash
    pnpm run build
    ```
@@ -102,6 +75,7 @@ If you want to run this locally (you can use `npm` as well ofc)
    ```bash
    pnpm link
    ```
+   
 4. See [usage](#usage) section
 
 ## Why
