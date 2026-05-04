@@ -1,4 +1,4 @@
-# `autocommit` [![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit) ![GPT-5-Mini](https://img.shields.io/badge/GPT--5--Mini-412991?logo=openai&logoColor=white) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-federation.svg?logo=git&logoColor=white)
+# `autocommit` [![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit) ![AI](https://img.shields.io/badge/AI-GPT--5--Gemini-412991?logo=openai&logoColor=white) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-federation.svg?logo=git&logoColor=white)
 
 Tool that generates and pushes [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) from staged changes in one go.
 
@@ -7,7 +7,7 @@ Tool that generates and pushes [conventional commits](https://www.conventionalco
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/en/download)
-- An [OpenAI API Key](https://platform.openai.com/api-keys)
+- An [OpenAI API Key](https://platform.openai.com/api-keys) OR [Gemini API Key](https://aistudio.google.com/app/apikey)
 
 ## Installation
 
@@ -25,10 +25,25 @@ autocommit -v
 
 ### Configuration
 
-Run the following command to securely save your API key in your home directory (`~/.autocommitrc`):
+Save your API key(s) in `~/.autocommitrc`. You can save keys for both providers and switch between them:
 
 ```bash
-autocommit --set-apikey "sk-your-api-key"
+# Save OpenAI key (keeps existing Gemini key if any)
+autocommit --openai-key "sk-your-api-key"
+
+# Save Gemini key (keeps existing OpenAI key if any)
+autocommit --gemini-key "your-gemini-api-key"
+
+# Switch default model
+autocommit --model gemini
+autocommit --model openai
+```
+
+**Runtime switch** - override default model for a single run:
+
+```bash
+AUTOCOMMIT_MODEL=gemini autocommit
+AUTOCOMMIT_MODEL=openai autocommit
 ```
 
 ## Usage

@@ -1,28 +1,9 @@
 import OpenAI from 'openai';
 import type { CommitType } from '../types/index.js';
-import { generatePrompt } from './prompt.js';
+import { generatePrompt, cleanDiff } from '../utils/index.js';
 import chalk from 'chalk';
 
 const FALLBACK_MESSAGE = 'chore(scope): update files';
-
-/**
- * Clean up the git diff by removing low-signal metadata lines
- * to save on input tokens.
- */
-function cleanDiff(diff: string): string {
-  return diff
-    .split('\n')
-    .filter((line) => {
-      return (
-        !line.startsWith('diff --git') &&
-        !line.startsWith('index ') &&
-        !line.startsWith('--- ') &&
-        !line.startsWith('+++ ')
-      );
-    })
-    .join('\n')
-    .trim();
-}
 
 export async function generateCommitMessage(diff: string, type: CommitType | null, files: string[] = [], branchName: string = ''): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;

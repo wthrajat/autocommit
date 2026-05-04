@@ -13,10 +13,11 @@ import {
   getBranchName
 } from '../lib/git.js';
 import { classifyDiff } from '../lib/classifier.js';
-import { generateCommitMessage } from '../lib/openai.js';
+import { generateCommitMessage as generateOpenAI } from '../lib/openai.js';
+import { generateCommitMessage as generateGemini } from '../lib/gemini.js';
 import { showCommitOptions } from '../utils/ui.js';
 import { logger, spinner, openEditor } from '../utils/index.js';
-import { getApiKey, saveApiKey } from '../config/index.js';
+import { getConfig, saveOpenAIKey, saveGeminiKey, setDefaultModel, ModelType } from '../config/index.js';
 import { ActionType } from '../types/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -27,33 +28,67 @@ async function main() {
   try {
     const args = process.argv.slice(2);
 
-if (args.includes('--version') || args.includes('-v')) {
+    if (args.includes('--version') || args.includes('-v')) {
       console.log(`autocommit version ${VERSION}`);
       process.exit(0);
     }
 
-    const setApiKeyIndex = args.indexOf('--set-apikey');
+    const openaiKeyIndex = args.indexOf('--openai-key');
+    const geminiKeyIndex = args.indexOf('--gemini-key');
+    const modelIndex = args.indexOf('--model');
 
-    if (setApiKeyIndex !== -1) {
-      const newApiKey = args[setApiKeyIndex + 1];
-      if (!newApiKey || newApiKey.startsWith('--')) {
-        logger.error('Please provide a valid API key after --set-apikey');
+    if (openaiKeyIndex !== -1) {
+      const apiKey = args[openaiKeyIndex + 1];
+      if (!apiKey || apiKey.startsWith('--')) {
+        logger.error('Please provide a valid API key after --openai-key');
         process.exit(1);
       }
-      await saveApiKey(newApiKey);
-      logger.success('API key saved successfully to ~/.autocommitrc!');
+      await saveOpenAIKey(apiKey);
+      logger.success('OpenAI API key saved to ~/.autocommitrc!');
       process.exit(0);
     }
 
-    const apiKey = await getApiKey();
+    if (geminiKeyIndex !== -1) {
+      const apiKey = args[geminiKeyIndex + 1];
+      if (!apiKey || apiKey.startsWith('--')) {
+        logger.error('Please provide a valid API key after --gemini-key');
+        process.exit(1);
+      }
+      await saveGeminiKey(apiKey);
+      logger.success('Gemini API key saved to ~/.autocommitrc!');
+      process.exit(0);
+    }
+
+    if (modelIndex !== -1) {
+      const model = args[modelIndex + 1] as ModelType;
+      if (!model || (model !== 'openai' && model !== 'gemini')) {
+        logger.error('Please specify --model with "openai" or "gemini"');
+        process.exit(1);
+      }
+      await setDefaultModel(model);
+      logger.success(`Default model set to ${model}!`);
+      process.exit(0);
+    }
+
+    const config = await getConfig();
     
-    if (!apiKey) {
-      logger.error('OpenAI API key not found.');
-      logger.info('Please set it by running: autocommit --set-apikey "sk-your-api-key"');
+    if (!config || (!config.openaiKey && !config.geminiKey)) {
+      logger.error('No API key found.');
+      logger.info('Please set it by running: autocommit --openai-key "sk-..." or autocommit --gemini-key "..."');
       process.exit(1);
     }
     
-    process.env.OPENAI_API_KEY = apiKey;
+    if (config.model === 'gemini' && config.geminiKey) {
+      process.env.GEMINI_API_KEY = config.geminiKey;
+    } else if (config.openaiKey) {
+      process.env.OPENAI_API_KEY = config.openaiKey;
+    } else if (config.geminiKey) {
+      process.env.GEMINI_API_KEY = config.geminiKey;
+      config.model = 'gemini';
+    } else {
+      logger.error('No API key found for the default model.');
+      process.exit(1);
+    }
 
     await isGitRepository();
 
@@ -75,7 +110,9 @@ if (args.includes('--version') || args.includes('-v')) {
     while (action === 'regenerate') {
       const s = spinner('Analyzing diff and generating commit message...').start();
       try {
-        message = await generateCommitMessage(diff, type, files, branchName);
+        message = config.model === 'gemini' 
+          ? await generateGemini(diff, type, files, branchName)
+          : await generateOpenAI(diff, type, files, branchName);
         s.succeed('Message generated successfully');
       } catch (error: any) {
         s.fail('Failed to generate message');
