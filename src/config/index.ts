@@ -65,7 +65,7 @@ export async function configFileExists(): Promise<boolean> {
 export async function saveOpenAIKey(apiKey: string): Promise<void> {
   const config = await loadConfigFile();
   config.openaiKey = apiKey;
-  if (!config.model) config.model = 'openai';
+  config.model = 'openai';
   
   await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), {
     encoding: 'utf-8',
@@ -76,7 +76,7 @@ export async function saveOpenAIKey(apiKey: string): Promise<void> {
 export async function saveGeminiKey(apiKey: string): Promise<void> {
   const config = await loadConfigFile();
   config.geminiKey = apiKey;
-  if (!config.model) config.model = 'gemini';
+  config.model = 'gemini';
   
   await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), {
     encoding: 'utf-8',
