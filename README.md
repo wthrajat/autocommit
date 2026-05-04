@@ -60,22 +60,8 @@ npm i -g @wthrajat/autocommit@latest
 
 ## Local Development
 
+Run it using `pnpm i && pnpm run dev` in the project root. Can also use `pnpm link` to link the package globally and test it in any repo without needing to build every time.
 
-1. Install deps:
-   ```bash
-   pnpm i
-   ```
-
-2. Build:
-   ```bash
-   pnpm run build
-   ```
-
-3. Make the tool accessible globally:
-   ```bash
-   pnpm link
-   ```
-   
 4. See [usage](#usage) section
 
 ## Why
