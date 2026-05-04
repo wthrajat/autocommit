@@ -51,6 +51,17 @@ async function loadConfigFile(): Promise<Config> {
   }
 }
 
+export async function configFileExists(): Promise<boolean> {
+  try {
+    await fs.access(CONFIG_FILE);
+    const data = await fs.readFile(CONFIG_FILE, 'utf-8');
+    const config = JSON.parse(data) as Config;
+    return !!(config.openaiKey || config.geminiKey);
+  } catch {
+    return false;
+  }
+}
+
 export async function saveOpenAIKey(apiKey: string): Promise<void> {
   const config = await loadConfigFile();
   config.openaiKey = apiKey;

@@ -18,7 +18,7 @@ import { generateCommitMessage as generateOpenAI } from '../lib/openai.js';
 import { generateCommitMessage as generateGemini } from '../lib/gemini.js';
 import { showCommitOptions } from '../utils/ui.js';
 import { logger, spinner, openEditor } from '../utils/index.js';
-import { getConfig, saveOpenAIKey, saveGeminiKey, setDefaultModel, setMessageStyle, getMessageStyle, ModelType } from '../config/index.js';
+import { getConfig, saveOpenAIKey, saveGeminiKey, setDefaultModel, setMessageStyle, getMessageStyle, configFileExists, ModelType } from '../config/index.js';
 import { ActionType } from '../types/index.js';
 import chalk from 'chalk';
 
@@ -86,10 +86,11 @@ async function main() {
       process.exit(0);
     }
 
-    let config = await getConfig();
-    const messageStyle = getMessageStyle(config || { openaiKey: '', geminiKey: '', model: 'openai', messageStyle: 'short' });
+    const hasConfig = await configFileExists();
     
-    if (!config || (!config.openaiKey && !config.geminiKey)) {
+    if (!hasConfig) {
+      console.log(chalk.yellow('Welcome to autocommit! Lets set up your configuration.\n'));
+      
       const setup = await prompts([
         {
           type: 'select',
@@ -104,7 +105,7 @@ async function main() {
         {
           type: 'text',
           name: 'apiKey',
-          message: 'Enter your API key:',
+          message: (prev) => `Enter your ${prev === 'openai' ? 'OpenAI' : 'Gemini'} API key:`,
           validate: (value) => value.length > 0 ? true : 'API key is required'
         },
         {
@@ -119,6 +120,11 @@ async function main() {
         }
       ]);
 
+      if (!setup.apiKey) {
+        logger.error('API key is required.');
+        process.exit(1);
+      }
+
       if (setup.model === 'openai') {
         await saveOpenAIKey(setup.apiKey);
       } else {
@@ -126,12 +132,21 @@ async function main() {
       }
       await setMessageStyle(setup.messageStyle);
       
-      config = await getConfig();
-      if (!config) {
-        logger.error('Failed to save configuration.');
-        process.exit(1);
-      }
+      logger.success('\nConfiguration saved to ~/.autocommitrc!');
+      console.log(chalk.gray('You can change these settings anytime with:'));
+      console.log(chalk.gray('  autocommit --openai-key "key"'));
+      console.log(chalk.gray('  autocommit --gemini-key "key"'));
+      console.log(chalk.gray('  autocommit --model openai|gemini'));
+      console.log(chalk.gray('  autocommit --short|--long\n'));
     }
+
+    const config = await getConfig();
+    if (!config) {
+      logger.error('Failed to load configuration.');
+      process.exit(1);
+    }
+    
+    const messageStyle = getMessageStyle(config);
     
     if (config.model === 'gemini' && config.geminiKey) {
       process.env.GEMINI_API_KEY = config.geminiKey;
