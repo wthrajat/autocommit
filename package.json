@@ -1,6 +1,6 @@
 {
   "name": "@wthrajat/autocommit",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Tool that generates conventional commits from staged changes and executes the commit in one go for cheap.",
   "keywords": [
     "git",
@@ -52,6 +52,11 @@
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.1"
+  },
+  "peerDependenciesMeta": {
+    "*": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=24.13.0"

@@ -4,10 +4,6 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import 'dotenv/config';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
-const VERSION = pkg.version;
 import { 
   isGitRepository, 
   hasStagedChanges, 
@@ -22,6 +18,10 @@ import { showCommitOptions } from '../utils/ui.js';
 import { logger, spinner, openEditor } from '../utils/index.js';
 import { getApiKey, saveApiKey } from '../config/index.js';
 import { ActionType } from '../types/index.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
+const VERSION = packageJson.version;
 
 async function main() {
   try {
