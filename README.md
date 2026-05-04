@@ -2,7 +2,7 @@
 
 Tool that generates and pushes [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) from staged changes in one go.
 
-![Demo](autocommit-demo.gif)
+![Demo](./public/assets/autocommit-demo.gif)
 
 ## Prerequisites
 
@@ -85,14 +85,6 @@ If you want to run this locally (you can use `npm` as well ofc)
    pnpm link
    ```
 4. See [usage](#usage) section
-
-## How
-
-- Analyzes `git diff --cached` using GPT-5-Mini (one of the most cost-effective models) to generate a commit message.
-- Uses heuristics to classify the type of changes (feat, fix, docs, etc.).
-- Automatically extracts Jira/Linear ticket IDs (e.g., `ENG-123`) from your branch name and appends them to the commit message.
-- Review, edit, or regenerate messages instantly.
-- Commits the changes on its own.
 
 ## Why
 
