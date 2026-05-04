@@ -1,7 +1,7 @@
-# autocommit
-[![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit) ![GPT-5-Mini](https://img.shields.io/badge/GPT--5--Mini-412991?logo=openai&logoColor=white) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-federation.svg?logo=git&logoColor=white)
+# `autocommit` [![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit) ![GPT-5-Mini](https://img.shields.io/badge/GPT--5--Mini-412991?logo=openai&logoColor=white) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-federation.svg?logo=git&logoColor=white)
 
 Tool that generates and pushes [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) from staged changes in one go.
+
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ npm i -g @wthrajat/autocommit
 To verify the installation, check the version:
 
 ```bash
-autocommit --version
+autocommit -v
 ```
 
 ### Updating
@@ -34,12 +34,6 @@ Or to latest within semver range:
 
 ```bash
 npm update @wthrajat/autocommit
-```
-
-To check if it's installed, you can check the version:
-
-```bash
-autocommit -v
 ```
 
 ### Configuration
@@ -57,7 +51,7 @@ autocommit --set-apikey "sk-your-api-key"
    git add <files>
    ```
 
-2. Run the tool (make sure it's installed globally or you have linked it using `pnpm link`):
+2. Run `autocommit` in the terminal:
    ```bash
    autocommit
    ```
