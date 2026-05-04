@@ -19,6 +19,7 @@ import { showCommitOptions } from '../utils/ui.js';
 import { logger, spinner, openEditor } from '../utils/index.js';
 import { getConfig, saveOpenAIKey, saveGeminiKey, setDefaultModel, ModelType } from '../config/index.js';
 import { ActionType } from '../types/index.js';
+import chalk from 'chalk';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
@@ -110,9 +111,14 @@ async function main() {
     while (action === 'regenerate') {
       const s = spinner('Analyzing diff and generating commit message...').start();
       try {
-        message = config.model === 'gemini' 
-          ? await generateGemini(diff, type, files, branchName)
-          : await generateOpenAI(diff, type, files, branchName);
+        if (config.model === 'gemini') {
+          console.log(chalk.blue('Using Gemini model for generation'));
+          message = await generateGemini(diff, type, files, branchName);
+        }
+        else {
+          console.log(chalk.blue('Using OpenAI model for generation'));
+          message = await generateOpenAI(diff, type, files, branchName);
+        }
         s.succeed('Message generated successfully');
       } catch (error: any) {
         s.fail('Failed to generate message');
