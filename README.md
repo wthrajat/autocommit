@@ -1,19 +1,19 @@
-# autocommit [![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit)
+# autocommit [![npm](https://img.shields.io/npm/v/%40wthrajat%2Fautocommit?logo=npm)](https://www.npmjs.com/package/@wthrajat/autocommit) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-federation.svg?logo=git&logoColor=white) ![GPT-5-Mini](https://img.shields.io/badge/GPT--5--Mini-412991?logo=openai&logoColor=white)
 
 Tool that generates [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) from staged 
 changes and executes the commit in one go. And it is cheap.
 
-## How ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-federation.svg?logo=git&logoColor=white)
+## How
 
-- Analyzes `git diff --cached` using GPT-5-Mini.
+- Analyzes `git diff --cached` using GPT-5-Mini (one of the most cost-effective models) to generate a commit message.
 - Uses heuristics to classify the type of changes (feat, fix, docs, etc.).
-- **Branch-to-Ticket Auto-Linking**: Automatically extracts Jira/Linear ticket IDs (e.g., `ENG-123`) from your branch name and appends them to the commit message.
+- Automatically extracts Jira/Linear ticket IDs (e.g., `ENG-123`) from your branch name and appends them to the commit message.
 - Review, edit, or regenerate messages instantly.
 - Commits the changes on its own.
 
-## Why ![Powered by GPT](https://img.shields.io/badge/Powered%20by-GPT--5--Mini-412991?logo=openai&logoColor=white)
+## Why
 
-It's just way cheaper for me. I still use Claude and Codex for the heavy lifting, but I never let them commit, I commit myself. I've let claude push commits for me several times and have hit my daily limit much faster. I think this has something to do with the recent bug where Claude was eating tokens like crazy. Anthropic even acknowledged the issue, see their [april report](https://www.anthropic.com/engineering/april-23-postmortem). So I am using this for my day to day work and so far so good. It has been a massive micro-productivity boost for me daily; I just stage my changes, run `autocommit`, and move on without burning through my main AI credits. One credit top-up lasts so long it's basically a "set it and forget it" situation. To give you an idea, as of now, OpenAI charges just $0.075 / 1M tokens for GPT-5-Mini.
+It's just way cheaper for me. I still use Claude and Codex for the heavy lifting, but I never let them commit, I commit myself. I've let claude push commits for me several times and have hit my daily limit much faster. I think this has something to do with the recent bug where Claude was eating tokens like crazy. Anthropic even acknowledged the issue, see their [april report](https://www.anthropic.com/engineering/april-23-postmortem). So I am using this for my day to day work and so far so good. It has been a massive micro-productivity boost for me daily; I just stage my changes, run `autocommit`, and move on without burning through my main AI credits. One credit top-up lasts so long it's basically a "set it and forget it" situation. To give you an idea, as of now, OpenAI charges just `$0.075` / `1M` tokens for GPT-5-Mini.
 
 And and no commitment issues like my ex :)
 
@@ -30,6 +30,12 @@ Install globally via `npm`:
 npm i -g @wthrajat/autocommit
 ```
 
+To verify the installation, check the version:
+
+```bash
+autocommit --version
+```
+
 ### Updating
 
 To update to the latest version, run:
@@ -42,6 +48,14 @@ Or to latest within semver range:
 
 ```bash
 npm update @wthrajat/autocommit
+```
+
+To check your current version, run:
+
+```bash
+autocommit --version
+# or
+autocommit -v
 ```
 
 ### Configuration

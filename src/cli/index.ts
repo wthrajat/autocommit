@@ -16,9 +16,17 @@ import { logger, spinner, openEditor } from '../utils/index.js';
 import { getApiKey, saveApiKey } from '../config/index.js';
 import { ActionType } from '../types/index.js';
 
+const VERSION = '0.0.11';
+
 async function main() {
   try {
     const args = process.argv.slice(2);
+
+    if (args.includes('--version') || args.includes('-v')) {
+      console.log(`autocommit version ${VERSION}`);
+      process.exit(0);
+    }
+
     const setApiKeyIndex = args.indexOf('--set-apikey');
 
     if (setApiKeyIndex !== -1) {
