@@ -179,11 +179,11 @@ async function main() {
       const s = spinner('Analyzing diff and generating commit message...').start();
       try {
         if (config.model === 'gemini') {
-          console.log(chalk.blue('Using Gemini model for generation'));
+          console.log(chalk.blue('Using Gemini for generation'));
           message = await generateGemini(diff, type, files, branchName, messageStyle);
         }
         else {
-          console.log(chalk.blue('Using OpenAI model for generation'));
+          console.log(chalk.blue('Using OpenAI for generation'));
           message = await generateOpenAI(diff, type, files, branchName, messageStyle);
         }
         s.succeed('Commit message generated!');
