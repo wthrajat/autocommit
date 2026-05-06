@@ -12,6 +12,7 @@ export interface Config {
   geminiKey: string;
   model: ModelType;
   messageStyle: MessageStyle;
+  signedCommit: boolean;
 }
 
 export async function getConfig(): Promise<Config | null> {
@@ -47,7 +48,7 @@ async function loadConfigFile(): Promise<Config> {
     const data = await fs.readFile(CONFIG_FILE, 'utf-8');
     return JSON.parse(data) as Config;
   } catch {
-    return { openaiKey: '', geminiKey: '', model: 'openai', messageStyle: 'short' };
+    return { openaiKey: '', geminiKey: '', model: 'openai', messageStyle: 'short', signedCommit: false };
   }
 }
 
@@ -104,10 +105,24 @@ export async function setMessageStyle(style: MessageStyle): Promise<void> {
   });
 }
 
+export async function setSignedCommit(signed: boolean): Promise<void> {
+  const config = await loadConfigFile();
+  config.signedCommit = signed;
+  
+  await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), {
+    encoding: 'utf-8',
+    mode: 0o600 
+  });
+}
+
 export function getMessageStyle(config: Config): MessageStyle {
   const envStyle = process.env.AUTOCOMMIT_MESSAGE_STYLE as MessageStyle;
   if (envStyle === 'short' || envStyle === 'long') {
     return envStyle;
   }
   return config.messageStyle || 'short';
+}
+
+export function getSignedCommit(config: Config): boolean {
+  return config.signedCommit || false;
 }

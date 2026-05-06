@@ -45,8 +45,9 @@ export async function getChangedFiles(): Promise<string[]> {
   return stdout.split('\n').filter(Boolean);
 }
 
-export async function commitChanges(message: string): Promise<void> {
-  await execa('git', ['commit', '-S', '-m', message]);
+export async function commitChanges(message: string, signed: boolean = false): Promise<void> {
+  const args = signed ? ['commit', '-S', '-m', message] : ['commit', '-m', message];
+  await execa('git', args);
 }
 
 export async function getBranchName(): Promise<string> {

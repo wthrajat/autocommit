@@ -18,7 +18,7 @@ import { generateCommitMessage as generateOpenAI } from '../lib/openai.js';
 import { generateCommitMessage as generateGemini } from '../lib/gemini.js';
 import { showCommitOptions } from '../utils/ui.js';
 import { logger, spinner, openEditor } from '../utils/index.js';
-import { getConfig, saveOpenAIKey, saveGeminiKey, setDefaultModel, setMessageStyle, getMessageStyle, configFileExists, ModelType } from '../config/index.js';
+import { getConfig, saveOpenAIKey, saveGeminiKey, setDefaultModel, setMessageStyle, getMessageStyle, configFileExists, ModelType, setSignedCommit, getSignedCommit } from '../config/index.js';
 import { ActionType } from '../types/index.js';
 import chalk from 'chalk';
 
@@ -32,6 +32,26 @@ async function main() {
 
     if (args.includes('--version') || args.includes('-v')) {
       console.log(`autocommit version ${VERSION}`);
+      process.exit(0);
+    }
+
+    if (args.includes('--help') || args.includes('-h')) {
+      console.log(`
+Usage: autocommit [options]
+
+Options:
+  -v, --version          Show version
+  -h, --help            Show this help message
+  --openai-key <key>    Set OpenAI API key
+  --gemini-key <key>    Set Gemini API key
+  --model <model>       Set default model (openai or gemini)
+  --short               Use short message style
+  --long               Use long message style
+  --sign                Enable GPG signed commits
+  --no-sign            Disable GPG signed commits
+
+Without options: Run interactive setup if no config exists, otherwise generate commit message.
+`.trim());
       process.exit(0);
     }
 
@@ -86,6 +106,21 @@ async function main() {
       process.exit(0);
     }
 
+    const signIndex = args.indexOf('--sign');
+    const noSignIndex = args.indexOf('--no-sign');
+
+    if (signIndex !== -1) {
+      await setSignedCommit(true);
+      logger.success('Signed commits enabled!');
+      process.exit(0);
+    }
+
+    if (noSignIndex !== -1) {
+      await setSignedCommit(false);
+      logger.success('Signed commits disabled!');
+      process.exit(0);
+    }
+
     const hasConfig = await configFileExists();
     
     if (!hasConfig) {
@@ -117,11 +152,20 @@ async function main() {
             { title: 'Long (with description)', value: 'long' }
           ],
           initial: 0
+        },
+        {
+          type: 'toggle',
+          name: 'signedCommit',
+          message: 'Sign commits with GPG?',
+          initial: false,
+          active: 'yes',
+          inactive: 'no'
         }
       ]);
       const model = setup.model;
       const apiKey = setup.apiKey;
       const messageStyle = setup.messageStyle;
+      const signedCommit = setup.signedCommit;
 
       if (model === 'openai') {
         await saveOpenAIKey(apiKey);
@@ -129,6 +173,7 @@ async function main() {
         await saveGeminiKey(apiKey);
       }
       await setMessageStyle(messageStyle);
+      await setSignedCommit(signedCommit);
 
       logger.success('\nConfiguration saved to ~/.autocommitrc!');
       console.log(chalk.gray('You can change these settings anytime with:'));
@@ -145,6 +190,7 @@ async function main() {
     }
     
     const messageStyle = getMessageStyle(config);
+    const signedCommit = getSignedCommit(config);
     
     if (config.model === 'gemini' && config.geminiKey) {
       process.env.GEMINI_API_KEY = config.geminiKey;
@@ -214,7 +260,7 @@ async function main() {
     if (shouldCommit && message) {
       const s = spinner('Committing...').start();
       try {
-        await commitChanges(message);
+        await commitChanges(message, signedCommit);
         s.succeed('Committed successfully!');
       } catch (error: any) {
         s.fail('Git commit failed');
