@@ -15,41 +15,34 @@ export interface Config {
   signedCommit: boolean;
 }
 
-export async function getConfig(): Promise<Config | null> {
-  if (process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY) {
-    const config = await loadConfigFile();
-    if (process.env.GEMINI_API_KEY) {
-      config.geminiKey = process.env.GEMINI_API_KEY;
-      config.model = 'gemini';
-    } else if (process.env.OPENAI_API_KEY) {
-      config.openaiKey = process.env.OPENAI_API_KEY;
-      config.model = 'openai';
-    }
-    return config;
-  }
-  
-  const envModel = process.env.AUTOCOMMIT_MODEL as ModelType;
-  const envStyle = process.env.AUTOCOMMIT_MESSAGE_STYLE as MessageStyle;
-  const config = await loadConfigFile();
-  
-  if (envModel && (envModel === 'gemini' || envModel === 'openai')) {
-    config.model = envModel;
-  }
-  
-  if (envStyle && (envStyle === 'short' || envStyle === 'long')) {
-    config.messageStyle = envStyle;
-  }
-  
-  return config;
-}
+const DEFAULT_CONFIG: Config = {
+  openaiKey: '',
+  geminiKey: '',
+  model: 'openai',
+  messageStyle: 'short',
+  signedCommit: false,
+};
 
 async function loadConfigFile(): Promise<Config> {
   try {
     const data = await fs.readFile(CONFIG_FILE, 'utf-8');
-    return JSON.parse(data) as Config;
+    return { ...DEFAULT_CONFIG, ...JSON.parse(data) };
   } catch {
-    return { openaiKey: '', geminiKey: '', model: 'openai', messageStyle: 'short', signedCommit: false };
+    return { ...DEFAULT_CONFIG };
   }
+}
+
+async function saveConfigFile(config: Config): Promise<void> {
+  await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), {
+    encoding: 'utf-8',
+    mode: 0o600,
+  });
+}
+
+async function updateConfig(updater: (config: Config) => Config): Promise<void> {
+  const config = await loadConfigFile();
+  const updated = updater(config);
+  await saveConfigFile(updated);
 }
 
 export async function configFileExists(): Promise<boolean> {
@@ -63,66 +56,61 @@ export async function configFileExists(): Promise<boolean> {
   }
 }
 
-export async function saveOpenAIKey(apiKey: string): Promise<void> {
+export async function getConfig(): Promise<Config | null> {
   const config = await loadConfigFile();
-  config.openaiKey = apiKey;
-  config.model = 'openai';
-  
-  await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), {
-    encoding: 'utf-8',
-    mode: 0o600 
+
+  if (process.env.GEMINI_API_KEY) {
+    config.geminiKey = process.env.GEMINI_API_KEY;
+    config.model = 'gemini';
+  } else if (process.env.OPENAI_API_KEY) {
+    config.openaiKey = process.env.OPENAI_API_KEY;
+    config.model = 'openai';
+  }
+
+  if (process.env.AUTOCOMMIT_MODEL === 'gemini' || process.env.AUTOCOMMIT_MODEL === 'openai') {
+    config.model = process.env.AUTOCOMMIT_MODEL;
+  }
+
+  if (process.env.AUTOCOMMIT_MESSAGE_STYLE === 'short' || process.env.AUTOCOMMIT_MESSAGE_STYLE === 'long') {
+    config.messageStyle = process.env.AUTOCOMMIT_MESSAGE_STYLE;
+  }
+
+  return config;
+}
+
+export async function saveApiKey(apiKey: string, model: ModelType): Promise<void> {
+  await updateConfig((config) => {
+    if (model === 'openai') {
+      config.openaiKey = apiKey;
+    } else {
+      config.geminiKey = apiKey;
+    }
+    config.model = model;
+    return config;
   });
 }
 
-export async function saveGeminiKey(apiKey: string): Promise<void> {
-  const config = await loadConfigFile();
-  config.geminiKey = apiKey;
-  config.model = 'gemini';
-  
-  await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), {
-    encoding: 'utf-8',
-    mode: 0o600 
-  });
-}
-
-export async function setDefaultModel(model: ModelType): Promise<void> {
-  const config = await loadConfigFile();
-  config.model = model;
-  
-  await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), {
-    encoding: 'utf-8',
-    mode: 0o600 
-  });
+export async function setModel(model: ModelType): Promise<void> {
+  await updateConfig((config) => ({ ...config, model }));
 }
 
 export async function setMessageStyle(style: MessageStyle): Promise<void> {
-  const config = await loadConfigFile();
-  config.messageStyle = style;
-  
-  await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), {
-    encoding: 'utf-8',
-    mode: 0o600 
-  });
+  await updateConfig((config) => ({ ...config, messageStyle: style }));
 }
 
 export async function setSignedCommit(signed: boolean): Promise<void> {
-  const config = await loadConfigFile();
-  config.signedCommit = signed;
-  
-  await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), {
-    encoding: 'utf-8',
-    mode: 0o600 
-  });
+  await updateConfig((config) => ({ ...config, signedCommit: signed }));
 }
 
 export function getMessageStyle(config: Config): MessageStyle {
-  const envStyle = process.env.AUTOCOMMIT_MESSAGE_STYLE as MessageStyle;
-  if (envStyle === 'short' || envStyle === 'long') {
-    return envStyle;
-  }
-  return config.messageStyle || 'short';
+  return process.env.AUTOCOMMIT_MESSAGE_STYLE === 'short' || process.env.AUTOCOMMIT_MESSAGE_STYLE === 'long'
+    ? process.env.AUTOCOMMIT_MESSAGE_STYLE
+    : config.messageStyle || 'short';
 }
 
 export function getSignedCommit(config: Config): boolean {
-  return config.signedCommit || false;
+  return config.signedCommit ?? false;
 }
+
+export const saveOpenAIKey = (apiKey: string) => saveApiKey(apiKey, 'openai');
+export const saveGeminiKey = (apiKey: string) => saveApiKey(apiKey, 'gemini');

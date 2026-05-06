@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import type { CommitType } from '../types/index.js';
-import { generatePrompt, cleanDiff } from '../utils/index.js';
+import { generatePrompt, cleanDiff } from './diff.js';
 import type { MessageStyle } from '../config/index.js';
 import chalk from 'chalk';
 

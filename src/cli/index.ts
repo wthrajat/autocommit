@@ -4,183 +4,104 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import 'dotenv/config';
-import prompts from 'prompts';
-import { 
-  isGitRepository, 
-  hasStagedChanges, 
-  getStagedDiff, 
-  getChangedFiles, 
-  commitChanges,
-  getBranchName
-} from '../lib/git.js';
-import { classifyDiff } from '../lib/classifier.js';
-import { generateCommitMessage as generateOpenAI } from '../lib/openai.js';
-import { generateCommitMessage as generateGemini } from '../lib/gemini.js';
-import { showCommitOptions } from '../utils/ui.js';
-import { logger, spinner, openEditor } from '../utils/index.js';
-import { getConfig, saveOpenAIKey, saveGeminiKey, setDefaultModel, setMessageStyle, getMessageStyle, configFileExists, ModelType, setSignedCommit, getSignedCommit } from '../config/index.js';
-import { ActionType } from '../types/index.js';
 import chalk from 'chalk';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
-const VERSION = packageJson.version;
+import { isGitRepository, hasStagedChanges, getStagedDiff, getChangedFiles, commitChanges, getBranchName } from '../lib/git.js';
+import { classifyDiff } from '../lib/classifier.js';
+import { generateCommitMessage } from '../lib/generator.js';
+import { showCommitOptions } from '../utils/ui.js';
+import { logger, spinner, openEditor } from '../utils/index.js';
+import { getConfig, getSignedCommit, configFileExists } from '../config/index.js';
+import { handleFlags } from './flags.js';
+import { runInteractiveSetup, setupApiKeyFromEnv } from './setup.js';
+import type { ActionType } from '../types/index.js';
 
-async function main() {
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const VERSION = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8')).version;
+
+async function validateGitState(): Promise<void> {
+  await isGitRepository();
+  const hasChanges = await hasStagedChanges();
+  if (!hasChanges) {
+    logger.warn('No staged changes found. Did you forget to run `git add`?');
+    process.exit(0);
+  }
+}
+
+async function generateMessage(config: { model: string }): Promise<string> {
+  const [diff, files, branchName] = await Promise.all([
+    getStagedDiff(),
+    getChangedFiles(),
+    getBranchName(),
+  ]);
+
+  const type = classifyDiff(files, diff);
+
+  const s = spinner('Analyzing diff and generating commit message...').start();
+  try {
+    const { model, messageStyle } = config as unknown as { model: 'openai' | 'gemini'; messageStyle: 'short' | 'long' };
+    console.log(chalk.blue(`Using ${model === 'gemini' ? 'Gemini' : 'OpenAI'} for generation`));
+
+    const message = await generateCommitMessage(model, { diff, type, files, branchName, messageStyle });
+    s.succeed('Commit message generated!');
+    return message;
+  } catch (error: unknown) {
+    s.fail('Failed to generate message');
+    logger.error((error as Error).message);
+    process.exit(1);
+  }
+}
+
+async function getUserAction(message: string): Promise<{ action: ActionType; shouldCommit: boolean; finalMessage: string }> {
+  let action: ActionType = 'regenerate';
+  let finalMessage = message;
+  let shouldCommit = false;
+
+  while (action === 'regenerate') {
+    action = await showCommitOptions(finalMessage);
+
+    if (action === 'accept') {
+      shouldCommit = true;
+    } else if (action === 'edit') {
+      try {
+        finalMessage = await openEditor(finalMessage);
+        shouldCommit = true;
+      } catch (error: unknown) {
+        logger.error(`Failed to open editor: ${(error as Error).message}`);
+        process.exit(1);
+      }
+    } else if (action === 'quit') {
+      logger.info('Aborted.');
+      process.exit(0);
+    }
+  }
+
+  return { action, shouldCommit, finalMessage };
+}
+
+async function commit(message: string, signed: boolean): Promise<void> {
+  const s = spinner('Committing...').start();
+  try {
+    await commitChanges(message, signed);
+    s.succeed('Committed successfully!');
+  } catch (error: unknown) {
+    s.fail('Git commit failed');
+    logger.error((error as Error).message);
+    process.exit(1);
+  }
+}
+
+async function main(): Promise<void> {
   try {
     const args = process.argv.slice(2);
-
-    if (args.includes('--version') || args.includes('-v')) {
-      console.log(`autocommit version ${VERSION}`);
-      process.exit(0);
-    }
-
-    if (args.includes('--help') || args.includes('-h')) {
-      console.log(`
-Usage: autocommit [options]
-
-Options:
-  -v, --version          Show version
-  -h, --help            Show this help message
-  --openai-key <key>    Set OpenAI API key
-  --gemini-key <key>    Set Gemini API key
-  --model <model>       Set default model (openai or gemini)
-  --short               Use short message style
-  --long               Use long message style
-  --sign                Enable GPG signed commits
-  --no-sign            Disable GPG signed commits
-
-Without options: Run interactive setup if no config exists, otherwise generate commit message.
-`.trim());
-      process.exit(0);
-    }
-
-    const openaiKeyIndex = args.indexOf('--openai-key');
-    const geminiKeyIndex = args.indexOf('--gemini-key');
-    const modelIndex = args.indexOf('--model');
-    const shortIndex = args.indexOf('--short');
-    const longIndex = args.indexOf('--long');
-
-    if (openaiKeyIndex !== -1) {
-      const apiKey = args[openaiKeyIndex + 1];
-      if (!apiKey || apiKey.startsWith('--')) {
-        logger.error('Please provide a valid API key after --openai-key');
-        process.exit(1);
-      }
-      await saveOpenAIKey(apiKey);
-      logger.success('OpenAI API key saved to ~/.autocommitrc!');
-      process.exit(0);
-    }
-
-    if (geminiKeyIndex !== -1) {
-      const apiKey = args[geminiKeyIndex + 1];
-      if (!apiKey || apiKey.startsWith('--')) {
-        logger.error('Please provide a valid API key after --gemini-key');
-        process.exit(1);
-      }
-      await saveGeminiKey(apiKey);
-      logger.success('Gemini API key saved to ~/.autocommitrc!');
-      process.exit(0);
-    }
-
-    if (modelIndex !== -1) {
-      const model = args[modelIndex + 1] as ModelType;
-      if (!model || (model !== 'openai' && model !== 'gemini')) {
-        logger.error('Please specify --model with "openai" or "gemini"');
-        process.exit(1);
-      }
-      await setDefaultModel(model);
-      logger.success(`Default model set to ${model}!`);
-      process.exit(0);
-    }
-
-    if (shortIndex !== -1) {
-      await setMessageStyle('short');
-      logger.success('Message style set to short!');
-      process.exit(0);
-    }
-
-    if (longIndex !== -1) {
-      await setMessageStyle('long');
-      logger.success('Message style set to long!');
-      process.exit(0);
-    }
-
-    const signIndex = args.indexOf('--sign');
-    const noSignIndex = args.indexOf('--no-sign');
-
-    if (signIndex !== -1) {
-      await setSignedCommit(true);
-      logger.success('Signed commits enabled!');
-      process.exit(0);
-    }
-
-    if (noSignIndex !== -1) {
-      await setSignedCommit(false);
-      logger.success('Signed commits disabled!');
+    const shouldExit = await handleFlags(args, VERSION);
+    if (shouldExit) {
       process.exit(0);
     }
 
     const hasConfig = await configFileExists();
-    
     if (!hasConfig) {
-      console.log(chalk.yellow('Welcome to autocommit! Lets set up your configuration.\n'));
-      
-      const setup = await prompts([
-        {
-          type: 'select',
-          name: 'model',
-          message: 'Which AI model would you like to use?',
-          choices: [
-            { title: 'OpenAI', value: 'openai' },
-            { title: 'Google Gemini', value: 'gemini' }
-          ],
-          initial: 0
-        },
-        {
-          type: 'password',
-          name: 'apiKey',
-          message: (prev) => `Enter your ${prev === 'openai' ? 'OpenAI' : 'Gemini'} API key:`,
-          validate: (value) => value.length > 0 ? true : 'API key is required'
-        },
-        {
-          type: 'select',
-          name: 'messageStyle',
-          message: 'What commit message style do you prefer?',
-          choices: [
-            { title: 'Short (one-line summary)', value: 'short' },
-            { title: 'Long (with description)', value: 'long' }
-          ],
-          initial: 0
-        },
-        {
-          type: 'toggle',
-          name: 'signedCommit',
-          message: 'Sign commits with GPG?',
-          initial: false,
-          active: 'yes',
-          inactive: 'no'
-        }
-      ]);
-      const model = setup.model;
-      const apiKey = setup.apiKey;
-      const messageStyle = setup.messageStyle;
-      const signedCommit = setup.signedCommit;
-
-      if (model === 'openai') {
-        await saveOpenAIKey(apiKey);
-      } else {
-        await saveGeminiKey(apiKey);
-      }
-      await setMessageStyle(messageStyle);
-      await setSignedCommit(signedCommit);
-
-      logger.success('\nConfiguration saved to ~/.autocommitrc!');
-      console.log(chalk.gray('You can change these settings anytime with:'));
-      console.log(chalk.gray('  autocommit --openai-key "key"'));
-      console.log(chalk.gray('  autocommit --gemini-key "key"'));
-      console.log(chalk.gray('  autocommit --model openai|gemini'));
-      console.log(chalk.gray('  autocommit --short|--long\n'));
+      await runInteractiveSetup();
     }
 
     const config = await getConfig();
@@ -188,89 +109,20 @@ Without options: Run interactive setup if no config exists, otherwise generate c
       logger.error('Failed to load configuration.');
       process.exit(1);
     }
-    
-    const messageStyle = getMessageStyle(config);
-    const signedCommit = getSignedCommit(config);
-    
-    if (config.model === 'gemini' && config.geminiKey) {
-      process.env.GEMINI_API_KEY = config.geminiKey;
-    } else if (config.openaiKey) {
-      process.env.OPENAI_API_KEY = config.openaiKey;
-    } else if (config.geminiKey) {
-      process.env.GEMINI_API_KEY = config.geminiKey;
-      config.model = 'gemini';
-    } else {
-      logger.error('No API key found for the default model.');
-      process.exit(1);
+
+    setupApiKeyFromEnv(config);
+
+    await validateGitState();
+
+    const message = await generateMessage(config);
+
+    const { shouldCommit, finalMessage } = await getUserAction(message);
+
+    if (shouldCommit && finalMessage) {
+      await commit(finalMessage, getSignedCommit(config));
     }
-
-    await isGitRepository();
-
-    const hasChanges = await hasStagedChanges();
-    if (!hasChanges) {
-      logger.warn('No staged changes found. Did you forget to run `git add`?');
-      process.exit(0);
-    }
-
-    let message: string = '';
-    let shouldCommit: boolean = false;
-    let action: ActionType = 'regenerate';
-
-    const diff = await getStagedDiff();
-    const files = await getChangedFiles();
-    const branchName = await getBranchName();
-    const type = classifyDiff(files, diff);
-
-    while (action === 'regenerate') {
-      const s = spinner('Analyzing diff and generating commit message...').start();
-      try {
-        if (config.model === 'gemini') {
-          console.log(chalk.blue('Using Gemini for generation'));
-          message = await generateGemini(diff, type, files, branchName, messageStyle);
-        }
-        else {
-          console.log(chalk.blue('Using OpenAI for generation'));
-          message = await generateOpenAI(diff, type, files, branchName, messageStyle);
-        }
-        s.succeed('Commit message generated!');
-      } catch (error: any) {
-        s.fail('Failed to generate message');
-        logger.error(error.message);
-        process.exit(1);
-      }
-
-      action = await showCommitOptions(message);
-
-      if (action === 'accept') {
-        shouldCommit = true;
-      } else if (action === 'edit') {
-        try {
-          message = await openEditor(message);
-          shouldCommit = true;
-        } catch (error: any) {
-          logger.error(`Failed to open editor: ${error.message}`);
-          process.exit(1);
-        }
-      } else if (action === 'quit') {
-        logger.info('Aborted.');
-        process.exit(0);
-      }
-    }
-
-    if (shouldCommit && message) {
-      const s = spinner('Committing...').start();
-      try {
-        await commitChanges(message, signedCommit);
-        s.succeed('Committed successfully!');
-      } catch (error: any) {
-        s.fail('Git commit failed');
-        logger.error(error.message);
-        process.exit(1);
-      }
-    }
-
-  } catch (error: any) {
-    logger.error(`An unexpected error occurred: ${error.message}`);
+  } catch (error: unknown) {
+    logger.error(`An unexpected error occurred: ${(error as Error).message}`);
     process.exit(1);
   }
 }
