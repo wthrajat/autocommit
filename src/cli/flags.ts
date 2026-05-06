@@ -10,6 +10,23 @@ export interface ParsedArgs {
   signedCommit?: boolean;
 }
 
+const HELP_MESSAGE = `
+Usage: autocommit [options]
+
+Options:
+  -v, --version          Show version
+  -h, --help            Show this help message
+  --openai-key <key>   Set OpenAI API key
+  --gemini-key <key>   Set Gemini API key
+  --model <model>      Set default model (openai or gemini)
+  --short              Use short message style
+  --long               Use long message style
+  --sign               Enable GPG signed commits
+  --no-sign            Disable GPG signed commits
+
+Without options: Run interactive setup if no config exists, otherwise generate commit message.
+`.trim();
+
 function findFlagIndex(args: string[], flag: string): number {
   return args.indexOf(flag);
 }
@@ -39,22 +56,7 @@ export async function handleFlags(args: string[], VERSION: string): Promise<bool
   }
 
   if (hasFlag(args, '--help') || hasFlag(args, '-h')) {
-    console.log(`
-Usage: autocommit [options]
-
-Options:
-  -v, --version          Show version
-  -h, --help            Show this help message
-  --openai-key <key>   Set OpenAI API key
-  --gemini-key <key>   Set Gemini API key
-  --model <model>      Set default model (openai or gemini)
-  --short              Use short message style
-  --long               Use long message style
-  --sign               Enable GPG signed commits
-  --no-sign            Disable GPG signed commits
-
-Without options: Run interactive setup if no config exists, otherwise generate commit message.
-    `.trim());
+    console.log(HELP_MESSAGE);
     return true;
   }
 

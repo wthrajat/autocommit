@@ -3,26 +3,7 @@ import type { CommitType } from '../types/index.js';
 import { generatePrompt, cleanDiff } from './diff.js';
 import type { MessageStyle } from '../config/index.js';
 import chalk from 'chalk';
-
-const FALLBACK_MESSAGE = 'chore(scope): update files';
-
-const SYSTEM_PROMPT_SHORT = `You are a git commit generator. Follow Conventional Commits strictly.
-
-Rules:
-1. Output EXACTLY ONE summary line only.
-2. ALWAYS include scope like feat(auth): or fix(core):.
-3. Summary max 72 chars, lowercase, no trailing period.
-4. NEVER output multiple separate commits, combine them into one.`;
-
-const SYSTEM_PROMPT_LONG = `You are a git commit generator. Follow Conventional Commits strictly.
-
-Rules:
-1. Output EXACTLY ONE summary line first.
-2. ALWAYS include scope like feat(auth): or fix(core):.
-3. Summary max 72 chars, lowercase, no trailing period.
-4. Add ONE blank line after summary, then bullet points with "-" for each change.
-5. DO NOT use markdown code blocks.
-6. NEVER output multiple separate commits, combine them into one.`;
+import { FALLBACK_MESSAGE, SYSTEM_PROMPT_SHORT, SYSTEM_PROMPT_LONG, MAX_DIFF_LENGTH, MAX_TOKENS_SHORT, MAX_TOKENS_LONG } from './prompts.js';
 
 export async function generateCommitMessage(
   diff: string,
@@ -44,9 +25,9 @@ export async function generateCommitMessage(
 
   const ai = new GoogleGenAI({ apiKey });
 
-  const cleanedDiff = cleanDiff(diff).substring(0, 10000);
+  const cleanedDiff = cleanDiff(diff).substring(0, MAX_DIFF_LENGTH);
   const systemPrompt = messageStyle === 'long' ? SYSTEM_PROMPT_LONG : SYSTEM_PROMPT_SHORT;
-  const maxTokens = messageStyle === 'long' ? 150 : 60;
+  const maxTokens = messageStyle === 'long' ? MAX_TOKENS_LONG : MAX_TOKENS_SHORT;
 
   try {
     const response = await ai.models.generateContent({
@@ -66,8 +47,8 @@ export async function generateCommitMessage(
     }
 
     return content;
-  } catch (error: any) {
-    console.error('Gemini API Error:', error.message || error);
+  } catch (error: unknown) {
+    console.error('Gemini API Error:', (error as Error).message);
     return type ? `${type}(scope): update files (fallback)` : FALLBACK_MESSAGE;
   }
 }
